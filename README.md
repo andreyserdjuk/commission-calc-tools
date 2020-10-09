@@ -21,7 +21,12 @@ will print output similar to:
 43.48  
 ```
 
-#### Run functional tests
+#### Run unit tests
 ```bash
 php bin/phpunit
+```
+
+### Generate unit tests coverage
+```bash
+php bin/phpunit --coverage-html ./coverage-html
 ```
