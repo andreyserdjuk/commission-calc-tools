@@ -10,19 +10,16 @@ git:
 php:
   - '7.4.1'
 
-before_install:
-  - if [[ $COVERAGE != true ]]; then phpenv config-rm xdebug.ini || true; fi
-
-install:
-  - composer install
+before_script:
+  - travis_retry composer self-update
+  - travis_retry composer install --no-interaction --prefer-source --dev
 
 script:
-  - ./bin/phpunit -c ./phpunit.xml --coverage-clover=coverage.xml
+  - ./bin/phpunit --coverage-clover coverage.xml
 
 env:
   - CODECOV_TOKEN="34400cde-9b49-4fed-8d91-6da51bda28f2"
 
 after_success:
-  # Submit coverage report to https://codecov.io
-  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash) -f $TRAVIS_BUILD_DIR/coverage.xml
 
