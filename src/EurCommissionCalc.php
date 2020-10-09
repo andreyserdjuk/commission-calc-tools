@@ -11,10 +11,10 @@ namespace CardAmountCalc;
  */
 class EurCommissionCalc implements CurrencyCommissionCalcInterface
 {
-    protected BinProviderInterface $binProvider;
-    protected CurrencyRateProviderInterface $rateProvider;
-    protected float $europeCommissionRate;
-    protected float $nonEuropeCommissionRate;
+    private BinProviderInterface $binProvider;
+    private CurrencyRateProviderInterface $rateProvider;
+    private float $europeCommissionRate;
+    private float $nonEuropeCommissionRate;
 
     public function __construct(
         BinProviderInterface $binProvider,

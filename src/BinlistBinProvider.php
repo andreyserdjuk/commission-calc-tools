@@ -8,6 +8,7 @@ namespace CardAmountCalc;
 
 use CardAmountCalc\Models\BinData;
 use CardAmountCalc\Models\Country;
+use UnexpectedValueException;
 
 class BinlistBinProvider implements BinProviderInterface
 {
@@ -17,17 +18,13 @@ class BinlistBinProvider implements BinProviderInterface
         $data = json_decode($data, true);
 
         if (empty($data['country']['alpha2'])) {
-            throw new \UnexpectedValueException('Malformed bin data');
+            throw new UnexpectedValueException('Malformed bin data');
         }
 
         // To map JSON to Objects you can also use a serializer when Models get bigger
-        $country = new Country();
-        $country->setAlpha2($data['country']['alpha2']);
+        $country = new Country($data['country']['alpha2']);
 
-        $binData = new BinData();
-        $binData->setCountry($country);
-
-        return $binData;
+        return new BinData($country);
     }
 
     /**

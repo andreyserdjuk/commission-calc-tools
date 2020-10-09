@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 
 namespace CardAmountCalc\Models;
 
 
 class BinData
 {
-    protected Country $country;
+    private Country $country;
+
+    public function __construct(Country $country)
+    {
+        $this->country = $country;
+    }
 
     public function getCountry(): Country
     {
         return $this->country;
-    }
-
-    public function setCountry(Country $country): void
-    {
-        $this->country = $country;
     }
 }
