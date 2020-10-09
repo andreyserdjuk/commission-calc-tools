@@ -1,7 +1,8 @@
-### Commission calculation tools
-[![Build Status](https://travis-ci.org/andreyserdjuk/commission-calc-tools.svg?branch=master)](https://travis-ci.org/andreyserdjuk/commission-calc-tools)  
+# Commission calculation tools
 
-Allows to calculate commission with preliminary conversion.
+>[![Build Status](https://travis-ci.org/andreyserdjuk/commission-calc-tools.svg?branch=master)](https://travis-ci.org/andreyserdjuk/commission-calc-tools)
+[![codecov](https://codecov.io/gh/andreyserdjuk/commission-calc-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/andreyserdjuk/commission-calc-tools)  
+>Allows to calculate commission with preliminary conversion.
 
 #### Install
 ```bash
