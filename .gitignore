@@ -1,0 +1,6 @@
+/bin
+/vendor
+/.idea
+/.phpunit.result.cache
+/.phpunit.cache
+/.DS_Store
