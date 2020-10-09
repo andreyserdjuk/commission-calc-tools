@@ -17,4 +17,8 @@ install:
   - composer install
 
 script:
-  - ./bin/phpunit -c ./phpunit.xml
+  - ./bin/phpunit -c ./phpunit.xml --coverage-clover=coverage.xml
+
+after_success:
+  # Submit coverage report to https://codecov.io
+  - bash <(curl -s https://codecov.io/bash)
