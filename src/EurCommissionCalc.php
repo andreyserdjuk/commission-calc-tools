@@ -34,11 +34,11 @@ class EurCommissionCalc implements CurrencyCommissionCalcInterface
         $alpha2 = $binData->getCountry()->getAlpha2();
         $isEu = $this->isEu($alpha2);
 
-        if ('EUR' === $sourceCurrency) {
+        if ($sourceCurrency === 'EUR') {
             $resultAmount = $amount;
         } else {
             $rate = $this->rateProvider->getRate('EUR', $sourceCurrency);
-            if (0.0 === $rate) {
+            if ($rate === 0.0) {
                 $resultAmount = $amount;
             } else {
                 $resultAmount = bcdiv((string) $amount, (string) $rate, 2);
@@ -46,12 +46,10 @@ class EurCommissionCalc implements CurrencyCommissionCalcInterface
         }
 
         $commissionRate = $isEu ? $this->europeCommissionRate : $this->nonEuropeCommissionRate;
-        $commission = bcmul((string) $resultAmount, (string) $commissionRate, 4);
-        $commission = (float) bcmul($commission, '100', 2);
-        $commission = ceil($commission);
-        $commission = (float) bcdiv((string) $commission, '100', 2);
+        $rawCommission = bcmul((string) $resultAmount, (string) $commissionRate, 4);
+        $ceilMult100Commission = ceil((float) bcmul($rawCommission, '100', 2));
 
-        return $commission;
+        return (float) bcdiv((string) $ceilMult100Commission, '100', 2);
     }
 
     protected function isEu(string $alpha2): bool

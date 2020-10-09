@@ -5,6 +5,7 @@ namespace Tests\CardAmountCalc\Unit;
 use CardAmountCalc\ExchangeratesProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 class ExchangeratesProviderTest extends TestCase
 {
@@ -19,7 +20,7 @@ class ExchangeratesProviderTest extends TestCase
         bool $isValidServerResponse
     ) {
         if (!$isValidServerResponse) {
-            $this->expectException(\UnexpectedValueException::class);
+            $this->expectException(UnexpectedValueException::class);
         }
 
         /** @var ExchangeratesProvider|MockObject $provider */
@@ -53,7 +54,7 @@ class ExchangeratesProviderTest extends TestCase
             [
                 '{"rates":{"CAD":1.5511},"base":"EUR","date":"2020-10-08"}',
                 'CAD',
-                1.56,
+                1.55,
                 true,
             ],
             [
@@ -65,13 +66,13 @@ class ExchangeratesProviderTest extends TestCase
             [
                 '{"rates":{"CAD":1.5503},"base":"EUR","date":"2020-10-08"}',
                 'CAD',
-                1.56,
+                1.55,
                 true,
             ],
             [
                 '{"rates":{"CAD":11.503},"base":"EUR","date":"2020-10-08"}',
                 'CAD',
-                11.51,
+                11.50,
                 true,
             ],
             [

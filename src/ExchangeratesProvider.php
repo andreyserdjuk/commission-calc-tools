@@ -5,6 +5,8 @@ declare(strict_types=1);
 
 namespace CardAmountCalc;
 
+use UnexpectedValueException;
+
 /**
  * Provides currency rate from api.exchangeratesapi.io
  */
@@ -12,18 +14,15 @@ class ExchangeratesProvider implements CurrencyRateProviderInterface
 {
     public function getRate(string $baseCurrency, string $targetCurrency): float
     {
-        $rates = $this->fetchData($baseCurrency);
-        $rates = json_decode($rates, true);
+        $rates = json_decode($this->fetchData($baseCurrency), true);
 
         if (empty($rates['rates'][$targetCurrency])) {
-            throw new \UnexpectedValueException('Malformed rates data.');
+            throw new UnexpectedValueException('Malformed rates data.');
         }
 
         $rate = (float) $rates['rates'][$targetCurrency];
-        $rate = bcmul((string) $rate, '100', 2);
-        $rate = ceil($rate);
 
-        return (float) bcdiv((string) $rate, '100', 2);
+        return round($rate, 2, PHP_ROUND_HALF_UP);
     }
 
     /**
