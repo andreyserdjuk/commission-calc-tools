@@ -81,7 +81,7 @@ class EurCommissionCalcTest extends TestCase
     /**
      * @return BinProviderInterface|MockObject
      */
-    protected function getBinProviderMock(string $alpha2)
+    private function getBinProviderMock(string $alpha2)
     {
         $country = $this->createConfiguredMock(Country::class, [
             'getAlpha2' => $alpha2,
@@ -109,7 +109,7 @@ class EurCommissionCalcTest extends TestCase
     /**
      * @return CurrencyRateProviderInterface|MockObject
      */
-    public function getCurrencyRateProviderMock(float $rate)
+    private function getCurrencyRateProviderMock(float $rate)
     {
         $currencyRateProvider = $this->getMockBuilder(CurrencyRateProviderInterface::class)
             ->onlyMethods(['getRate'])
