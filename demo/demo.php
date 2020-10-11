@@ -4,9 +4,9 @@ declare(strict_types = 1);
 
 require __DIR__.'/../vendor/autoload.php';
 
-use CardAmountCalc\BinlistBinProvider;
-use CardAmountCalc\EurCommissionCalc;
-use CardAmountCalc\ExchangeratesProvider;
+use CommissionCalc\BinlistBinProvider;
+use CommissionCalc\EurCommissionCalc;
+use CommissionCalc\ExchangeratesProvider;
 
 $file = new SplFileObject(__DIR__.'/input.txt');
 
@@ -19,8 +19,10 @@ $calc = new EurCommissionCalc(
     0.02
 );
 
-while (!$file->eof()) {
-    $line = $file->fgets();
+while (
+    !$file->eof() &&
+    $line = $file->fgets() // skip empty line
+) {
     $paymentData = json_decode($line, true);
     $bin = $paymentData['bin'];
     $amount = (float) $paymentData['amount'];

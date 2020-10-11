@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\CardAmountCalc\Unit;
+namespace Tests\CommissionCalc\Unit;
 
-use CardAmountCalc\ExchangeratesProvider;
+use CommissionCalc\ExchangeratesProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
@@ -11,7 +11,7 @@ class ExchangeratesProviderTest extends TestCase
 {
     /**
      * @dataProvider ratesDataProvider
-     * @covers \CardAmountCalc\ExchangeratesProvider::getRate()
+     * @covers \CommissionCalc\ExchangeratesProvider::getRate()
      */
     public function testGetRate(
         ?string $fileGetContentsResult,
@@ -48,31 +48,31 @@ class ExchangeratesProviderTest extends TestCase
             [
                 '{"rates":{"USD":1.1765,"MXN":25.1418,"ILS":3.9909,"GBP":0.91035},"base":"EUR","date":"2020-10-08"}',
                 'USD',
-                1.18,
+                1.1765,
                 true,
             ],
             [
                 '{"rates":{"CAD":1.5511},"base":"EUR","date":"2020-10-08"}',
                 'CAD',
-                1.55,
+                1.5511,
                 true,
             ],
             [
                 '{"rates":{"CAD":1.5599},"base":"EUR","date":"2020-10-08"}',
                 'CAD',
-                1.56,
+                1.5599,
                 true,
             ],
             [
                 '{"rates":{"CAD":1.5503},"base":"EUR","date":"2020-10-08"}',
                 'CAD',
-                1.55,
+                1.5503,
                 true,
             ],
             [
                 '{"rates":{"CAD":11.503},"base":"EUR","date":"2020-10-08"}',
                 'CAD',
-                11.50,
+                11.503,
                 true,
             ],
             [
@@ -80,6 +80,12 @@ class ExchangeratesProviderTest extends TestCase
                 'USD',
                 0.00,
                 false,
+            ],
+            [
+                '{"rates":{"CAD":11.503},"base":"EUR","date":"2020-10-08"}',
+                'EUR',
+                1.00,
+                true,
             ],
             [
                 '',

@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 
-namespace CardAmountCalc;
+namespace CommissionCalc;
 
 
-use CardAmountCalc\Models\BinData;
-use CardAmountCalc\Models\Country;
+use CommissionCalc\Models\BinData;
+use CommissionCalc\Models\Country;
 use UnexpectedValueException;
 
 class BinlistBinProvider implements BinProviderInterface

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace CardAmountCalc;
+namespace CommissionCalc;
 
 
 interface CurrencyRateProviderInterface

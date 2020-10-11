@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 
-namespace CardAmountCalc;
+namespace CommissionCalc;
 
 
 /**
  * Calculates commission in EUR from source currency.
  */
-class EurCommissionCalc implements CurrencyCommissionCalcInterface
+class EurCommissionCalc implements CommissionCalcInterface
 {
     private BinProviderInterface $binProvider;
     private CurrencyRateProviderInterface $rateProvider;
@@ -30,33 +30,38 @@ class EurCommissionCalc implements CurrencyCommissionCalcInterface
 
     public function calcCommission(string $bin, float $amount, string $sourceCurrency): float
     {
-        $binData = $this->binProvider->getBinData($bin);
-        $alpha2 = $binData->getCountry()->getAlpha2();
-        $isEu = $this->isEu($alpha2);
+        $rate = $this->rateProvider->getRate($sourceCurrency, 'EUR');
+        $amountInEur = bcmul((string) $amount, (string) $rate, 2);
 
-        if ($sourceCurrency === 'EUR') {
-            $resultAmount = $amount;
-        } else {
-            $rate = $this->rateProvider->getRate('EUR', $sourceCurrency);
-            if ($rate === 0.0) {
-                $resultAmount = $amount;
-            } else {
-                $resultAmount = bcdiv((string) $amount, (string) $rate, 2);
-            }
-        }
+        $countryCode = $this->binProvider
+            ->getBinData($bin)
+            ->getCountry()
+            ->getAlpha2()
+        ;
 
-        $commissionRate = $isEu ? $this->europeCommissionRate : $this->nonEuropeCommissionRate;
-        $rawCommission = bcmul((string) $resultAmount, (string) $commissionRate, 4);
-        $ceilMult100Commission = ceil((float) bcmul($rawCommission, '100', 2));
+        $commissionRate = $this->isEu($countryCode)
+            ? $this->europeCommissionRate
+            : $this->nonEuropeCommissionRate
+        ;
 
-        return (float) bcdiv((string) $ceilMult100Commission, '100', 2);
+        $commission = (float) bcmul($amountInEur, (string) $commissionRate, 4);
+
+        return $this->ceilFloat($commission, 2);
     }
 
-    protected function isEu(string $alpha2): bool
+    private function isEu(string $alpha2): bool
     {
         return in_array($alpha2, [
             'AT', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'HU',
             'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PO', 'PT', 'RO', 'SE', 'SI', 'SK',
         ], true);
+    }
+
+    private function ceilFloat(float $number, int $scale): float
+    {
+        $preparedToCeil = bcmul((string) $number, '100', 2);
+        $ceilNumber = ceil((float) $preparedToCeil);
+
+        return (float) bcdiv((string) $ceilNumber, '100', $scale);
     }
 }

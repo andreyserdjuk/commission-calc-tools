@@ -1,10 +1,10 @@
 <?php
 
 
-namespace CardAmountCalc;
+namespace CommissionCalc;
 
 
-use CardAmountCalc\Models\BinData;
+use CommissionCalc\Models\BinData;
 
 interface BinProviderInterface
 {

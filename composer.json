@@ -8,13 +8,13 @@
 
     "autoload": {
         "psr-4": {
-            "CardAmountCalc\\": "src/"
+            "CommissionCalc\\": "src/"
         }
     },
 
     "autoload-dev": {
         "psr-4": {
-            "Tests\\CardAmountCalc\\": "tests/"
+            "Tests\\CommissionCalc\\": "tests/"
         }
     },
 

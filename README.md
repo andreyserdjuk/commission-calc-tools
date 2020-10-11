@@ -9,17 +9,25 @@
 composer install
 ```
 
-#### Run demo
+#### Run demo and original script
+Demo script runs refactored code, original - raw script.
 ```bash
 php demo/demo.php
+php demo/original.php
 ```
 will print output similar to:  
 ```
-1  
-0.43  
-1.61  
-2.21  
-43.48  
+1
+0.43
+1.61
+2.21
+43.88
+#
+1
+0.42390843577787
+1.6006402561024
+2.2043238660449
+43.875525135191  
 ```
 
 #### Run unit tests

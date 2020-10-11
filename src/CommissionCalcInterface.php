@@ -1,14 +1,14 @@
 <?php
 
 
-namespace CardAmountCalc;
+namespace CommissionCalc;
 
 /**
  * Calculates commission in defined currency (provided with DI or bound to class)
  * from given amount and source currency.
  * Logic of calculation can depend on card Issuer.
  */
-interface CurrencyCommissionCalcInterface
+interface CommissionCalcInterface
 {
     /**
      * @param string $bin Bank Identification Number (BIN)

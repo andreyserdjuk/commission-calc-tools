@@ -1,23 +1,24 @@
 <?php
 
-namespace Tests\CardAmountCalc\Unit;
+namespace Tests\CommissionCalc\Unit;
 
-use CardAmountCalc\BinlistBinProvider;
-use CardAmountCalc\Models\BinData;
-use CardAmountCalc\Models\Country;
+use CommissionCalc\BinlistBinProvider;
+use CommissionCalc\Models\BinData;
+use CommissionCalc\Models\Country;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 class BinlistBinProviderTest extends TestCase
 {
     /**
      * @dataProvider binDataProvider
-     * @covers       \CardAmountCalc\BinlistBinProvider::getBinData()
+     * @covers       \CommissionCalc\BinlistBinProvider::getBinData()
      */
     public function testGetBinData(?string $fileGetContentsResult, bool $isValidServerResponse)
     {
         if (!$isValidServerResponse) {
-            $this->expectException(\UnexpectedValueException::class);
+            $this->expectException(UnexpectedValueException::class);
         }
 
         /** @var BinlistBinProvider|MockObject $provider */

@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\CardAmountCalc\Unit;
+namespace Tests\CommissionCalc\Unit;
 
-use CardAmountCalc\BinProviderInterface;
-use CardAmountCalc\CurrencyRateProviderInterface;
-use CardAmountCalc\EurCommissionCalc;
-use CardAmountCalc\Models\BinData;
-use CardAmountCalc\Models\Country;
+use CommissionCalc\BinProviderInterface;
+use CommissionCalc\CurrencyRateProviderInterface;
+use CommissionCalc\EurCommissionCalc;
+use CommissionCalc\Models\BinData;
+use CommissionCalc\Models\Country;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -17,37 +17,28 @@ class EurCommissionCalcTest extends TestCase
 
     /**
      * @dataProvider calcCommissionDataProvider
-     * @covers \CardAmountCalc\EurCommissionCalc::calcCommission
-     * @covers \CardAmountCalc\EurCommissionCalc::__construct
+     * @covers \CommissionCalc\EurCommissionCalc::calcCommission
+     * @covers \CommissionCalc\EurCommissionCalc::ceilFloat
+     * @covers \CommissionCalc\EurCommissionCalc::__construct
      */
     public function testCalcCommission(
         float $sourceAmount,
         string $sourceCurrency,
-        bool $isEu,
+        string $alpha2,
         float $rate,
         float $expectedCommission
     ) {
-        $binProvider = $this->getBinProviderMock();
+        $binProvider = $this->getBinProviderMock($alpha2);
         $currencyRateProvider = $this->getCurrencyRateProviderMock($rate);
 
-        /** @var EurCommissionCalc|MockObject $commissionCalc */
-        $commissionCalc = $this->getMockBuilder(EurCommissionCalc::class)
-            ->onlyMethods(['isEu'])
-            ->setConstructorArgs([
-                $binProvider,
-                $currencyRateProvider,
-                self::EUR_COMMISSION_RATE,
-                self::NON_EUR_COMMISSION_RATE,
-            ])
-            ->disableOriginalClone()
-            ->disableArgumentCloning()
-            ->disallowMockingUnknownTypes()
-            ->getMock();
-        $commissionCalc
-            ->method('isEu')
-            ->willReturn($isEu);
+        $calc = new EurCommissionCalc(
+            $binProvider,
+            $currencyRateProvider,
+            self::EUR_COMMISSION_RATE,
+            self::NON_EUR_COMMISSION_RATE,
+        );
 
-        $commission = $commissionCalc->calcCommission('123123', $sourceAmount, $sourceCurrency);
+        $commission = $calc->calcCommission('123123', $sourceAmount, $sourceCurrency);
 
         $this->assertEquals($expectedCommission, $commission);
     }
@@ -58,89 +49,41 @@ class EurCommissionCalcTest extends TestCase
             [
                 22.11,
                 'EUR',
-                true,
-                0,
+                'AT',
+                1,
                 0.23, /** ceil result of 22.11 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
             ],
             [
                 56.32,
                 'EUR',
-                false,
-                0,
+                'US',
+                1,
                 1.13, /** ceil result of 56.32 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
             ],
             [
                 10,
                 'USD',
-                true,
-                1.11,
-                0.09, /** ceil result of 10 / 1.11 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
+                'RO',
+                0.9,
+                0.09, /** ceil result of 10 * 0.9 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
             ],
             [
                 10,
                 'USD',
-                false,
-                1.11,
-                0.18, /** ceil result of 10 / 1.11 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
-            ],
-            [
-                10,
-                'USD',
-                false,
-                0,
-                0.2, /** ceil result of 10 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
-            ],
-        ];
-    }
-
-    /**
-     * @dataProvider isEuDataProvider
-     * @covers \CardAmountCalc\EurCommissionCalc::isEu()
-     */
-    public function testIsEu($countryCode, $expectedIsEu)
-    {
-        $commissionCalc = $this->createMock(EurCommissionCalc::class);
-
-        $isEu = (function ($alpha2) {
-            return $this->isEu($alpha2);
-        })->call($commissionCalc, $countryCode);
-
-        $this->assertEquals($expectedIsEu, $isEu);
-    }
-
-    public function isEuDataProvider()
-    {
-        return [
-            [
-                'LU',
-                true
-            ],
-            [
-                'PO',
-                true,
-            ],
-            [
-                'US',
-                false,
-            ],
-            [
-                'FR',
-                true,
-            ],
-            [
                 'RU',
-                false,
-            ]
+                0.8,
+                0.16, /** ceil result of 10 * 0.8 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
+            ],
         ];
     }
 
     /**
      * @return BinProviderInterface|MockObject
      */
-    protected function getBinProviderMock()
+    protected function getBinProviderMock(string $alpha2)
     {
         $country = $this->createConfiguredMock(Country::class, [
-            'getAlpha2' => 'XX'
+            'getAlpha2' => $alpha2,
         ]);
 
         $binData = $this->createConfiguredMock(BinData::class, [
