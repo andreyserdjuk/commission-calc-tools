@@ -1,6 +1,5 @@
 <?php
 
-
 namespace CommissionCalc;
 
 /**
@@ -11,9 +10,9 @@ namespace CommissionCalc;
 interface CommissionCalcInterface
 {
     /**
-     * @param string $bin Bank Identification Number (BIN)
-     * @param float $amount amount calculated in given currency
-     * @param string $sourceCurrency
+     * @param  string $bin            Bank Identification Number (BIN)
+     * @param  float  $amount         amount calculated in given currency
+     * @param  string $sourceCurrency
      * @return float commission in target currency
      */
     public function calcCommission(

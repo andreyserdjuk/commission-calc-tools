@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-
 namespace CommissionCalc;
-
 
 use CommissionCalc\Models\BinData;
 use CommissionCalc\Models\Country;

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace CommissionCalc;
 
 use UnexpectedValueException;
@@ -32,6 +31,6 @@ class ExchangeratesProvider implements CurrencyRateProviderInterface
      */
     protected function fetchData(string $baseCurrency): string
     {
-        return (string) file_get_contents('https://api.exchangeratesapi.io/latest?base='.$baseCurrency);
+        return (string) file_get_contents('https://api.exchangeratesapi.io/latest?base=' . $baseCurrency);
     }
 }

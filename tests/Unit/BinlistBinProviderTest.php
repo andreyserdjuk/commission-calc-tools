@@ -11,6 +11,7 @@ use UnexpectedValueException;
 
 class BinlistBinProviderTest extends TestCase
 {
+
     /**
      * @dataProvider binDataProvider
      * @covers       \CommissionCalc\BinlistBinProvider::getBinData()
@@ -46,19 +47,30 @@ class BinlistBinProviderTest extends TestCase
     {
         return [
             [
-                '{"number":{"length":16,"luhn":true},"scheme":"visa","type":"debit","brand":"Visa/Dankort","prepaid":false,"country":{"numeric":"208","alpha2":"DK","name":"Denmark","emoji":"🇩🇰","currency":"DKK","latitude":56,"longitude":10},"bank":{"name":"Jyske Bank","url":"www.jyskebank.dk","phone":"+4589893300","city":"Hjørring"}}',
+                '{"number":{"length":16,"luhn":true},"scheme":"visa","type":"debit","brand":"Visa/Dankort",'
+                . '"prepaid":false,"country":{"numeric":"208","alpha2":"DK","name":"Denmark","emoji":"🇩🇰",'
+                . '"currency":"DKK","latitude":56,"longitude":10},"bank":{"name":"Jyske Bank","url":"www.jyskebank.dk",'
+                . '"phone":"+4589893300","city":"Hjørring"}}',
                 true,
             ],
             [
-                '{"country":{"numeric":"208","alpha2":"DK","name":"Denmark","emoji":"🇩🇰","currency":"DKK","latitude":56,"longitude":10},"bank":{"name":"Jyske Bank","url":"www.jyskebank.dk","phone":"+4589893300","city":"Hjørring"}}',
+                '{"country":{"numeric":"208","alpha2":"DK","name":"Denmark","emoji":"🇩🇰","currency":"DKK",'
+                . '"latitude":56,"longitude":10},"bank":{"name":"Jyske Bank","url":"www.jyskebank.dk",'
+                . '"phone":"+4589893300","city":"Hjørring"}}',
                 true,
             ],
             [
-                '{"number":{"length":16,"luhn":true},"scheme":"visa","type":"debit","brand":"Visa/Dankort","prepaid":false,"country":{"numeric":"208","xxx":"DK","name":"Denmark","emoji":"🇩🇰","currency":"DKK","latitude":56,"longitude":10},"bank":{"name":"Jyske Bank","url":"www.jyskebank.dk","phone":"+4589893300","city":"Hjørring"}}',
+                '{"number":{"length":16,"luhn":true},"scheme":"visa","type":"debit","brand":"Visa/Dankort",'
+                . '"prepaid":false,"country":{"numeric":"208","xxx":"DK","name":"Denmark","emoji":"🇩🇰",'
+                . '"currency":"DKK","latitude":56,"longitude":10},"bank":{"name":"Jyske Bank","url":"www.jyskebank.dk",'
+                . '"phone":"+4589893300","city":"Hjørring"}}',
                 false,
             ],
             [
-                '{"number":{"length":16,"luhn":true},"scheme":"visa","type":"debit","brand":"Visa/Dankort","prepaid":false,"xxx":{"numeric":"208","":"DK","name":"Denmark","emoji":"🇩🇰","currency":"DKK","latitude":56,"longitude":10},"bank":{"name":"Jyske Bank","url":"www.jyskebank.dk","phone":"+4589893300","city":"Hjørring"}}',
+                '{"number":{"length":16,"luhn":true},"scheme":"visa","type":"debit","brand":"Visa/Dankort",'
+                . '"prepaid":false,"xxx":{"numeric":"208","":"DK","name":"Denmark","emoji":"🇩🇰","currency":"DKK",'
+                . '"latitude":56,"longitude":10},"bank":{"name":"Jyske Bank","url":"www.jyskebank.dk",'
+                . '"phone":"+4589893300","city":"Hjørring"}}',
                 false,
             ],
             [
