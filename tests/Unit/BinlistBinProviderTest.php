@@ -11,7 +11,6 @@ use UnexpectedValueException;
 
 class BinlistBinProviderTest extends TestCase
 {
-
     /**
      * @dataProvider binDataProvider
      * @covers       \CommissionCalc\BinlistBinProvider::getBinData()
