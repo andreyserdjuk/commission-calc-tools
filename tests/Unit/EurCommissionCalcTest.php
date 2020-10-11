@@ -18,6 +18,7 @@ class EurCommissionCalcTest extends TestCase
     /**
      * @dataProvider calcCommissionDataProvider
      * @covers \CommissionCalc\EurCommissionCalc::calcCommission
+     * @covers \CommissionCalc\EurCommissionCalc::isEu
      * @covers \CommissionCalc\EurCommissionCalc::ceilFloat
      * @covers \CommissionCalc\EurCommissionCalc::__construct
      */
