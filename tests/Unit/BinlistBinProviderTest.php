@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\CommissionCalc\Unit;
+namespace CommissionCalc\Tests\Unit;
 
 use CommissionCalc\BinlistBinProvider;
 use CommissionCalc\Models\BinData;
