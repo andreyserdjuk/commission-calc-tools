@@ -13,7 +13,7 @@ composer install
 #### Run demo and original script
 First command runs refactored code, second - raw script.
 ```bash
-php -n bin/console co:print "$(< ./demo/input.txt)"
+php bin/console co:print "$(< ./demo/input.txt)"
 php demo/original.php
 ```
 will print output similar to:  
