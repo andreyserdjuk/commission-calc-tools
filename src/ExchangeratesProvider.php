@@ -4,33 +4,36 @@ declare(strict_types=1);
 
 namespace CommissionCalc;
 
+use CommissionCalc\Models\CurrencyRates;
+use Psr\Http\Client\ClientExceptionInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use UnexpectedValueException;
 
 /**
- * Provides currency rate from api.exchangeratesapi.io
+ * Provides currency rates from api.exchangeratesapi.io
  */
 class ExchangeratesProvider implements CurrencyRateProviderInterface
 {
-    public function getRate(string $baseCurrency, string $targetCurrency): float
+    private ExchangeRatesClientInterface $client;
+
+    private SerializerInterface $serializer;
+
+    public function __construct(ExchangeRatesClientInterface $client, SerializerInterface $serializer)
     {
-        if ($baseCurrency === $targetCurrency) {
-            return 1.00;
-        }
-
-        $rates = json_decode($this->fetchData($baseCurrency), true);
-
-        if (empty($rates['rates'][$targetCurrency])) {
-            throw new UnexpectedValueException('Malformed rates data.');
-        }
-
-        return (float) $rates['rates'][$targetCurrency];
+        $this->client = $client;
+        $this->serializer = $serializer;
     }
 
     /**
-     * @codeCoverageIgnore
+     * @throws UnexpectedValueException|ClientExceptionInterface
      */
-    protected function fetchData(string $baseCurrency): string
+    public function getRates(string $baseCurrency): CurrencyRates
     {
-        return (string) file_get_contents('https://api.exchangeratesapi.io/latest?base=' . $baseCurrency);
+        $ratesData = $this->client->getRatesData($baseCurrency)->getContents();
+        /** @var CurrencyRates $rates */
+        $rates = $this->serializer->deserialize($ratesData, CurrencyRates::class, 'json');
+//        $rates->getRates()
+
+        return $rates;
     }
 }

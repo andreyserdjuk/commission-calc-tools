@@ -6,7 +6,8 @@ use CommissionCalc\BinProviderInterface;
 use CommissionCalc\CurrencyRateProviderInterface;
 use CommissionCalc\EurCommissionCalc;
 use CommissionCalc\Models\BinData;
-use CommissionCalc\Models\Country;
+use CommissionCalc\Models\BinCountry;
+use CommissionCalc\Models\CurrencyRates;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -17,10 +18,10 @@ class EurCommissionCalcTest extends TestCase
 
     /**
      * @dataProvider calcCommissionDataProvider
-     * @covers \CommissionCalc\EurCommissionCalc::calcCommission
-     * @covers \CommissionCalc\EurCommissionCalc::isEu
-     * @covers \CommissionCalc\EurCommissionCalc::ceilFloat
-     * @covers \CommissionCalc\EurCommissionCalc::__construct
+     * @covers       \CommissionCalc\EurCommissionCalc::calcCommission
+     * @covers       \CommissionCalc\EurCommissionCalc::isEu
+     * @covers       \CommissionCalc\EurCommissionCalc::ceilFloat
+     * @covers       \CommissionCalc\EurCommissionCalc::__construct
      */
     public function testCalcCommission(
         float $sourceAmount,
@@ -52,28 +53,28 @@ class EurCommissionCalcTest extends TestCase
                 'EUR',
                 'AT',
                 1,
-                0.23, /** ceil result of 22.11 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
+                0.23,/** ceil result of 22.11 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
             ],
             [
                 56.32,
                 'EUR',
                 'US',
                 1,
-                1.13, /** ceil result of 56.32 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
+                1.13,/** ceil result of 56.32 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
             ],
             [
                 10,
                 'USD',
                 'RO',
                 0.9,
-                0.09, /** ceil result of 10 * 0.9 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
+                0.09,/** ceil result of 10 * 0.9 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
             ],
             [
                 10,
                 'USD',
                 'RU',
                 0.8,
-                0.16, /** ceil result of 10 * 0.8 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
+                0.16,/** ceil result of 10 * 0.8 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
             ],
         ];
     }
@@ -83,13 +84,19 @@ class EurCommissionCalcTest extends TestCase
      */
     private function getBinProviderMock(string $alpha2)
     {
-        $country = $this->createConfiguredMock(Country::class, [
-            'getAlpha2' => $alpha2,
-        ]);
+        $country = $this->createConfiguredMock(
+            BinCountry::class,
+            [
+                'getAlpha2' => $alpha2,
+            ]
+        );
 
-        $binData = $this->createConfiguredMock(BinData::class, [
-            'getCountry' => $country,
-        ]);
+        $binData = $this->createConfiguredMock(
+            BinData::class,
+            [
+                'getCountry' => $country,
+            ]
+        );
 
         $binProvider = $this->getMockBuilder(BinProviderInterface::class)
             ->onlyMethods(['getBinData'])
@@ -97,11 +104,13 @@ class EurCommissionCalcTest extends TestCase
             ->disableOriginalClone()
             ->disableArgumentCloning()
             ->disallowMockingUnknownTypes()
-            ->getMock();
+            ->getMock()
+        ;
 
         $binProvider
             ->method('getBinData')
-            ->willReturn($binData);
+            ->willReturn($binData)
+        ;
 
         return $binProvider;
     }
@@ -112,16 +121,25 @@ class EurCommissionCalcTest extends TestCase
     private function getCurrencyRateProviderMock(float $rate)
     {
         $currencyRateProvider = $this->getMockBuilder(CurrencyRateProviderInterface::class)
-            ->onlyMethods(['getRate'])
+            ->onlyMethods(['getRates'])
             ->disableOriginalConstructor()
             ->disableOriginalClone()
             ->disableArgumentCloning()
             ->disallowMockingUnknownTypes()
-            ->getMock();
+            ->getMock()
+        ;
+
+        $rates = $this->createConfiguredMock(
+            CurrencyRates::class,
+            [
+                'getRate' => $rate,
+            ]
+        );
 
         $currencyRateProvider
-            ->method('getRate')
-            ->willReturn($rate);
+            ->method('getRates')
+            ->willReturn($rates)
+        ;
 
         return $currencyRateProvider;
     }

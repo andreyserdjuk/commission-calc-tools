@@ -2,7 +2,9 @@
 
 namespace CommissionCalc;
 
+use CommissionCalc\Models\CurrencyRates;
+
 interface CurrencyRateProviderInterface
 {
-    public function getRate(string $baseCurrency, string $targetCurrency): float;
+    public function getRates(string $baseCurrency): CurrencyRates;
 }

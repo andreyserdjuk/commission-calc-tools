@@ -3,43 +3,62 @@
 namespace CommissionCalc\Tests\Unit;
 
 use CommissionCalc\BinlistBinProvider;
+use CommissionCalc\BinlistClientInterface;
+use CommissionCalc\Models\BinCountry;
 use CommissionCalc\Models\BinData;
-use CommissionCalc\Models\Country;
+use GuzzleHttp\Exception\InvalidArgumentException;
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
-use UnexpectedValueException;
+use Psr\Http\Client\ClientExceptionInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
-class BinlistBinProviderTest extends TestCase
+class BinlistBinProviderTest extends BaseTestCase
 {
     /**
      * @dataProvider binDataProvider
      * @covers       \CommissionCalc\BinlistBinProvider::getBinData()
+     * @covers       \CommissionCalc\BinlistBinProvider::__construct()
      */
-    public function testGetBinData(?string $fileGetContentsResult, bool $isValidServerResponse)
+    public function testGetBinData(?string $binDataRespose, bool $isValidServerResponse)
     {
         if (!$isValidServerResponse) {
-            $this->expectException(UnexpectedValueException::class);
+            $this->expectException(ExceptionInterface::class);
         }
 
-        /** @var BinlistBinProvider|MockObject $provider */
-        $provider = $this->getMockBuilder(BinlistBinProvider::class)
-            ->onlyMethods(['fetchData'])
-            ->disableOriginalConstructor()
-            ->disableOriginalClone()
-            ->disableArgumentCloning()
-            ->disallowMockingUnknownTypes()
-            ->getMock()
-        ;
+        $ratesClientMock = $this->createConfiguredMock(
+            BinlistClientInterface::class,
+            [
+                'getBinData' => Utils::streamFor($binDataRespose),
+            ]
+        );
 
-        $provider
-            ->method('fetchData')
-            ->willReturn($fileGetContentsResult);
-
+        $provider = new BinlistBinProvider($ratesClientMock, $this->getSerializer());
         $binData = $provider->getBinData('123412341234');
 
         $this->assertInstanceOf(BinData::class, $binData);
-        $this->assertInstanceOf(Country::class, $binData->getCountry());
-        $this->assertNotEmpty(Country::class, $binData->getCountry()->getAlpha2());
+        $this->assertInstanceOf(BinCountry::class, $binData->getCountry());
+        $this->assertNotEmpty(BinCountry::class, $binData->getCountry()->getAlpha2());
+    }
+
+    /**
+     * @covers \CommissionCalc\BinlistBinProvider::getBinData()
+     * @covers \CommissionCalc\BinlistBinProvider::__construct()
+     */
+    public function testApiServerError()
+    {
+        $this->expectException(ClientExceptionInterface::class);
+
+        /** @var MockObject|BinlistClientInterface $clientMock */
+        $clientMock = $this->getMockBuilder(BinlistClientInterface::class)
+            ->onlyMethods(['getBinData'])
+            ->getMock();
+
+        $clientMock
+            ->method('getBinData')
+            ->willThrowException(new InvalidArgumentException());
+
+        $provider = new BinlistBinProvider($clientMock, $this->getSerializer());
+        $provider->getBinData('1234');
     }
 
     public function binDataProvider()
@@ -56,7 +75,7 @@ class BinlistBinProviderTest extends TestCase
                 '{"country":{"numeric":"208","alpha2":"DK","name":"Denmark","emoji":"🇩🇰","currency":"DKK",'
                 . '"latitude":56,"longitude":10},"bank":{"name":"Jyske Bank","url":"www.jyskebank.dk",'
                 . '"phone":"+4589893300","city":"Hjørring"}}',
-                true,
+                false,
             ],
             [
                 '{"number":{"length":16,"luhn":true},"scheme":"visa","type":"debit","brand":"Visa/Dankort",'

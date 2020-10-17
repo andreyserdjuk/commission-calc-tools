@@ -1,0 +1,69 @@
+parameters:
+  exchangerates_host: '%env(EXCHANGERATES_HOST)%'
+  binlist_host: '%env(BINLIST_HOST)%'
+  version: 0.1
+
+services:
+  _defaults:
+    autowire: true
+
+  CommissionCalc\:
+    resource: '../src/'
+    exclude:
+      - '../src/Models/'
+      - '../src/Command/'
+
+  CommissionCalc\EurCommissionCalc:
+    arguments:
+      $europeCommissionRate: 0.01
+      $nonEuropeCommissionRate: 0.02
+
+  CommissionCalc\ExchangeRatesRestClient:
+    arguments:
+      - !service
+          class: GuzzleHttp\Client
+      - '%exchangerates_host%'
+
+  CommissionCalc\BinlistClient:
+    arguments:
+      - !service
+          class: GuzzleHttp\Client
+      - '%binlist_host%'
+
+  Symfony\Component\Serializer\SerializerInterface:
+    class: Symfony\Component\Serializer\Serializer
+    arguments:
+      $normalizers:
+        - !service
+            class: Symfony\Component\Serializer\Normalizer\ObjectNormalizer
+            arguments:
+              - ~
+              - ~
+              - ~
+              - !service
+                  class: Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor
+        - !service
+            class: Symfony\Component\Serializer\Normalizer\DateTimeNormalizer
+      $encoders:
+        - !service
+            class: Symfony\Component\Serializer\Encoder\JsonEncoder
+
+  # `````````````````````#
+  # Console Application  #
+  #......................#
+  console_app:
+    class: Symfony\Component\Console\Application
+    public: true
+    calls:
+      - method: addCommands
+        arguments:
+          -
+            - '@CommissionCalc\Command\PrintCommissionCommand'
+      - method: setVersion
+        arguments:
+          - '%version%'
+      - method: setName
+        arguments:
+          - 'COMMISSION CALC'
+
+  CommissionCalc\Command\PrintCommissionCommand: ~

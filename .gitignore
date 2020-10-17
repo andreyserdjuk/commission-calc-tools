@@ -1,4 +1,5 @@
-/bin
+/bin/*
+!/bin/console
 /vendor
 /.idea
 /.phpunit.result.cache

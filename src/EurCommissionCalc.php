@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CommissionCalc;
 
+use UnexpectedValueException;
+
 /**
  * Calculates commission in EUR from source currency.
  */
@@ -26,15 +28,28 @@ class EurCommissionCalc implements CommissionCalcInterface
         $this->nonEuropeCommissionRate = $nonEuropeCommissionRate;
     }
 
-    public function calcCommission(string $bin, float $amount, string $sourceCurrency): float
+    public function calcCommission(string $bin, string $amount, string $sourceCurrency): float
     {
-        $rate = $this->rateProvider->getRate($sourceCurrency, 'EUR');
+        $rate = $this->rateProvider
+            ->getRates($sourceCurrency)
+            ->getRate('EUR')
+        ;
+
+        if ($rate === null) {
+            throw new UnexpectedValueException(sprintf(
+                'Rates does not contain rate for "%s" with base currency "%s".',
+                $sourceCurrency,
+                'EUR'
+            ));
+        }
+
         $amountInEur = bcmul((string)$amount, (string)$rate, 2);
 
         $countryCode = $this->binProvider
             ->getBinData($bin)
             ->getCountry()
-            ->getAlpha2();
+            ->getAlpha2()
+        ;
 
         $commissionRate = $this->isEu($countryCode)
             ? $this->europeCommissionRate

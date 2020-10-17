@@ -2,20 +2,25 @@
 
 namespace CommissionCalc\Tests\Unit;
 
+use CommissionCalc\ExchangeRatesClientInterface;
 use CommissionCalc\ExchangeratesProvider;
+use CommissionCalc\Models\CurrencyRates;
+use GuzzleHttp\Exception\InvalidArgumentException;
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use Psr\Http\Client\ClientExceptionInterface;
 use UnexpectedValueException;
 
-class ExchangeratesProviderTest extends TestCase
+class ExchangeratesProviderTest extends BaseTestCase
 {
     /**
      * @dataProvider ratesDataProvider
-     * @covers \CommissionCalc\ExchangeratesProvider::getRate()
+     * @covers       \CommissionCalc\ExchangeratesProvider::getRates()
+     * @covers       \CommissionCalc\ExchangeratesProvider::__construct()
      */
     public function testGetRate(
-        ?string $fileGetContentsResult,
-        string $curency,
+        string $ratesDataResponse,
+        string $currencyCode,
         float $expectedRate,
         bool $isValidServerResponse
     ) {
@@ -23,23 +28,39 @@ class ExchangeratesProviderTest extends TestCase
             $this->expectException(UnexpectedValueException::class);
         }
 
-        /** @var ExchangeratesProvider|MockObject $provider */
-        $provider = $this->getMockBuilder(ExchangeratesProvider::class)
-            ->onlyMethods(['fetchData'])
-            ->disableOriginalConstructor()
-            ->disableOriginalClone()
-            ->disableArgumentCloning()
-            ->disallowMockingUnknownTypes()
-            ->getMock()
-        ;
+        $ratesClientMock = $this->createConfiguredMock(
+            ExchangeRatesClientInterface::class,
+            [
+                'getRatesData' => Utils::streamFor($ratesDataResponse),
+            ]
+        );
 
-        $provider
-            ->method('fetchData')
-            ->willReturn($fileGetContentsResult);
+        $provider = new ExchangeratesProvider($ratesClientMock, $this->getSerializer());
+        $rates = $provider->getRates('EUR');
 
-        $rate = $provider->getRate('EUR', $curency);
+        $this->assertInstanceOf(CurrencyRates::class, $rates);
+        $this->assertEquals($expectedRate, $rates->getRate($currencyCode));
+    }
 
-        $this->assertEquals($expectedRate, $rate);
+    /**
+     * @covers \CommissionCalc\ExchangeratesProvider::getRates()
+     * @covers \CommissionCalc\ExchangeratesProvider::__construct()
+     */
+    public function testApiServerError()
+    {
+        $this->expectException(ClientExceptionInterface::class);
+
+        /** @var MockObject|ExchangeRatesClientInterface $clientMock */
+        $clientMock = $this->getMockBuilder(ExchangeRatesClientInterface::class)
+            ->onlyMethods(['getRatesData'])
+            ->getMock();
+
+        $clientMock
+            ->method('getRatesData')
+            ->willThrowException(new InvalidArgumentException());
+
+        $provider = new ExchangeratesProvider($clientMock, $this->getSerializer());
+        $provider->getRates('EUR');
     }
 
     public function ratesDataProvider()
@@ -73,18 +94,6 @@ class ExchangeratesProviderTest extends TestCase
                 '{"rates":{"CAD":11.503},"base":"EUR","date":"2020-10-08"}',
                 'CAD',
                 11.503,
-                true,
-            ],
-            [
-                '{"rates":{"CAD":11.503},"base":"EUR","date":"2020-10-08"}',
-                'USD',
-                0.00,
-                false,
-            ],
-            [
-                '{"rates":{"CAD":11.503},"base":"EUR","date":"2020-10-08"}',
-                'EUR',
-                1.00,
                 true,
             ],
             [

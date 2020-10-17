@@ -5,31 +5,30 @@ declare(strict_types=1);
 namespace CommissionCalc;
 
 use CommissionCalc\Models\BinData;
-use CommissionCalc\Models\Country;
-use UnexpectedValueException;
+use Psr\Http\Client\ClientExceptionInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class BinlistBinProvider implements BinProviderInterface
 {
-    public function getBinData(string $bin): BinData
+    private BinlistClientInterface $client;
+    private SerializerInterface $serializer;
+
+    public function __construct(BinlistClientInterface $client, SerializerInterface $serializer)
     {
-        $data = $this->fetchData($bin);
-        $data = json_decode($data, true);
-
-        if (empty($data['country']['alpha2'])) {
-            throw new UnexpectedValueException('Malformed bin data');
-        }
-
-        // To map JSON to Objects you can also use a serializer when Models get bigger
-        $country = new Country($data['country']['alpha2']);
-
-        return new BinData($country);
+        $this->client = $client;
+        $this->serializer = $serializer;
     }
 
     /**
-     * @codeCoverageIgnore
+     * @throws ExceptionInterface|ClientExceptionInterface
      */
-    protected function fetchData($bin): string
+    public function getBinData(string $bin): BinData
     {
-        return (string) file_get_contents('https://lookup.binlist.net/' . $bin);
+        $data = $this->client->getBinData($bin)->getContents();
+        /** @var BinData $binData */
+        $binData = $this->serializer->deserialize($data, BinData::class, 'json');
+
+        return $binData;
     }
 }
