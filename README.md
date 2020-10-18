@@ -18,7 +18,7 @@ php demo/original.php
 ```
 will print output similar to:  
 ```
-1
+1.00
 0.43
 1.61
 2.21
