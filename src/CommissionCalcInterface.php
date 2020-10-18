@@ -13,11 +13,11 @@ interface CommissionCalcInterface
      * @param  string $bin            Bank Identification Number (BIN)
      * @param  string $amount         amount calculated in given currency
      * @param  string $sourceCurrency
-     * @return float commission in target currency
+     * @return string commission in target currency
      */
     public function calcCommission(
         string $bin,
         string $amount,
         string $sourceCurrency
-    ): float;
+    ): string;
 }

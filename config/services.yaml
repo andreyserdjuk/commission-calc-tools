@@ -1,6 +1,8 @@
 parameters:
   exchangerates_host: '%env(EXCHANGERATES_HOST)%'
   binlist_host: '%env(BINLIST_HOST)%'
+  europe_commission_rate: '%env(EUROPE_COMMISSION_RATE)%'
+  non_europe_commission_rate: '%env(NON_EUROPE_COMMISSION_RATE)%'
   version: 0.1
 
 services:
@@ -15,8 +17,8 @@ services:
 
   CommissionCalc\EurCommissionCalc:
     arguments:
-      $europeCommissionRate: 0.01
-      $nonEuropeCommissionRate: 0.02
+      $europeCommissionRate: '%europe_commission_rate%'
+      $nonEuropeCommissionRate: '%non_europe_commission_rate%'
 
   CommissionCalc\ExchangeRatesRestClient:
     arguments:

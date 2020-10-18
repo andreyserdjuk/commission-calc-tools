@@ -32,7 +32,6 @@ class ExchangeratesProvider implements CurrencyRateProviderInterface
         $ratesData = $this->client->getRatesData($baseCurrency)->getContents();
         /** @var CurrencyRates $rates */
         $rates = $this->serializer->deserialize($ratesData, CurrencyRates::class, 'json');
-//        $rates->getRates()
 
         return $rates;
     }

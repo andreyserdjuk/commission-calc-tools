@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CommissionCalc\Tests\Unit;
 
 use CommissionCalc\BinProviderInterface;
@@ -10,11 +12,12 @@ use CommissionCalc\Models\BinCountry;
 use CommissionCalc\Models\CurrencyRates;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 class EurCommissionCalcTest extends TestCase
 {
-    private const EUR_COMMISSION_RATE = 0.01;
-    private const NON_EUR_COMMISSION_RATE = 0.02;
+    private const EUR_COMMISSION_RATE = '0.01';
+    private const NON_EUR_COMMISSION_RATE = '0.02';
 
     /**
      * @dataProvider calcCommissionDataProvider
@@ -24,12 +27,17 @@ class EurCommissionCalcTest extends TestCase
      * @covers       \CommissionCalc\EurCommissionCalc::__construct
      */
     public function testCalcCommission(
-        float $sourceAmount,
+        string $sourceAmount,
         string $sourceCurrency,
         string $alpha2,
-        float $rate,
-        float $expectedCommission
+        ?float $rate,
+        string $expectedCommission,
+        $expectedException
     ) {
+        if ($expectedException !== null) {
+            $this->expectException($expectedException);
+        }
+
         $binProvider = $this->getBinProviderMock($alpha2);
         $currencyRateProvider = $this->getCurrencyRateProviderMock($rate);
 
@@ -49,32 +57,52 @@ class EurCommissionCalcTest extends TestCase
     {
         return [
             [
-                22.11,
+                '22.11',
                 'EUR',
                 'AT',
                 1,
-                0.23,/** ceil result of 22.11 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
+                '0.23',/** ceil result of 22.11 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
+                null,
             ],
             [
-                56.32,
+                '10000.00',
+                'JPY',
+                'US',
+                0.1,
+                '20.00',/** ceil result of 10000.00 * 0.1 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
+                null,
+            ],
+            [
+                '56.32',
                 'EUR',
                 'US',
                 1,
-                1.13,/** ceil result of 56.32 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
+                '1.13',/** ceil result of 56.32 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
+                null,
             ],
             [
-                10,
+                '10',
                 'USD',
                 'RO',
                 0.9,
-                0.09,/** ceil result of 10 * 0.9 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
+                '0.09',/** ceil result of 10 * 0.9 * 0.01; @see EurCommissionCalcTest::EUR_COMMISSION_RATE */
+                null,
             ],
             [
-                10,
+                '10',
                 'USD',
                 'RU',
                 0.8,
-                0.16,/** ceil result of 10 * 0.8 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
+                '0.16',/** ceil result of 10 * 0.8 * 0.02; @see EurCommissionCalcTest::NON_EUR_COMMISSION_RATE */
+                null,
+            ],
+            [
+                '10',
+                'USD',
+                'RU',
+                null,
+                '0.00',
+                UnexpectedValueException::class,
             ],
         ];
     }
@@ -118,7 +146,7 @@ class EurCommissionCalcTest extends TestCase
     /**
      * @return CurrencyRateProviderInterface|MockObject
      */
-    private function getCurrencyRateProviderMock(float $rate)
+    private function getCurrencyRateProviderMock(?float $rate)
     {
         $currencyRateProvider = $this->getMockBuilder(CurrencyRateProviderInterface::class)
             ->onlyMethods(['getRates'])

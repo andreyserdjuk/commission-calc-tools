@@ -13,14 +13,14 @@ class EurCommissionCalc implements CommissionCalcInterface
 {
     private BinProviderInterface $binProvider;
     private CurrencyRateProviderInterface $rateProvider;
-    private float $europeCommissionRate;
-    private float $nonEuropeCommissionRate;
+    private string $europeCommissionRate;
+    private string $nonEuropeCommissionRate;
 
     public function __construct(
         BinProviderInterface $binProvider,
         CurrencyRateProviderInterface $rateProvider,
-        float $europeCommissionRate,
-        float $nonEuropeCommissionRate
+        string $europeCommissionRate,
+        string $nonEuropeCommissionRate
     ) {
         $this->binProvider = $binProvider;
         $this->rateProvider = $rateProvider;
@@ -28,7 +28,7 @@ class EurCommissionCalc implements CommissionCalcInterface
         $this->nonEuropeCommissionRate = $nonEuropeCommissionRate;
     }
 
-    public function calcCommission(string $bin, string $amount, string $sourceCurrency): float
+    public function calcCommission(string $bin, string $amount, string $sourceCurrency): string
     {
         $rate = $this->rateProvider
             ->getRates($sourceCurrency)
@@ -55,7 +55,7 @@ class EurCommissionCalc implements CommissionCalcInterface
             ? $this->europeCommissionRate
             : $this->nonEuropeCommissionRate;
 
-        $commission = (float)bcmul($amountInEur, (string)$commissionRate, 4);
+        $commission = bcmul($amountInEur, $commissionRate, 4);
 
         return $this->ceilFloat($commission, 2);
     }
@@ -72,11 +72,11 @@ class EurCommissionCalc implements CommissionCalcInterface
         );
     }
 
-    private function ceilFloat(float $number, int $scale): float
+    private function ceilFloat($number, int $scale): string
     {
-        $preparedToCeil = bcmul((string)$number, '100', 2);
+        $preparedToCeil = bcmul($number, '100', 2);
         $ceilNumber = ceil((float)$preparedToCeil);
 
-        return (float)bcdiv((string)$ceilNumber, '100', $scale);
+        return bcdiv((string)$ceilNumber, '100', $scale);
     }
 }

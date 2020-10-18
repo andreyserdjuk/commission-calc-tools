@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CommissionCalc\Tests\Unit;
 
 use CommissionCalc\BinlistBinProvider;

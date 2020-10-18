@@ -1,21 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CommissionCalc\Command;
 
-use CommissionCalc\CommissionCalcInterface;
+use CommissionCalc\RawCommissionCalcInterface;
+use Exception;
+use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Throwable;
 
 class PrintCommissionCommand extends Command
 {
     protected static $defaultName = 'comcalc:print-commission';
 
-    private CommissionCalcInterface $commissionCalc;
+    private RawCommissionCalcInterface $commissionCalc;
 
-    public function __construct(CommissionCalcInterface $commissionCalc)
+    public function __construct(RawCommissionCalcInterface $commissionCalc)
     {
         parent::__construct();
         $this->commissionCalc = $commissionCalc;
@@ -38,19 +41,15 @@ class PrintCommissionCommand extends Command
         $data = $input->getArgument('data');
         $lines = explode("\n", $data);
 
-        foreach ($lines as $line) {
-            $paymentData = json_decode($line, true);
-            $bin = $paymentData['bin'];
-            $amount = $paymentData['amount'];
-            $currency = $paymentData['currency'];
+        foreach ($lines as $paymentData) {
             try {
-                $commission = $this->commissionCalc->calcCommission($bin, $amount, $currency);
-            } catch (Throwable $e) {
+                $commission = $this->commissionCalc->calcCommission($paymentData);
+                $output->writeln($commission);
+            } catch (ClientExceptionInterface $e) {
+                $output->writeln('External service is broken: ' . $e->getMessage());
+            } catch (Exception $e) {
                 $output->writeln($e->getMessage());
-                $output->writeln($e->getTraceAsString());
-                return Command::SUCCESS;
             }
-            $output->writeln($commission);
         }
 
         return Command::SUCCESS;

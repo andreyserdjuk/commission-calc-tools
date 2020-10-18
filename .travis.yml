@@ -15,7 +15,7 @@ before_script:
   - travis_retry composer install --no-interaction --prefer-source
 
 script:
-  - ./bin/phpunit --coverage-clover coverage.xml
+  - ./bin/phpunit --testsuite unit --coverage-clover coverage.xml
 
 env:
   - CODECOV_TOKEN="34400cde-9b49-4fed-8d91-6da51bda28f2"
