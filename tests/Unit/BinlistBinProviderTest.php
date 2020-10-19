@@ -6,13 +6,13 @@ namespace CommissionCalc\Tests\Unit;
 
 use CommissionCalc\BinlistBinProvider;
 use CommissionCalc\BinlistClientInterface;
+use CommissionCalc\Exception\ProviderConnectivityException;
+use CommissionCalc\Exception\ProviderDataException;
 use CommissionCalc\Models\BinCountry;
 use CommissionCalc\Models\BinData;
 use GuzzleHttp\Exception\InvalidArgumentException;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Http\Client\ClientExceptionInterface;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class BinlistBinProviderTest extends BaseTestCase
 {
@@ -24,7 +24,7 @@ class BinlistBinProviderTest extends BaseTestCase
     public function testGetBinData(?string $binDataRespose, bool $isValidServerResponse)
     {
         if (!$isValidServerResponse) {
-            $this->expectException(ExceptionInterface::class);
+            $this->expectException(ProviderDataException::class);
         }
 
         $ratesClientMock = $this->createConfiguredMock(
@@ -48,7 +48,7 @@ class BinlistBinProviderTest extends BaseTestCase
      */
     public function testApiServerError()
     {
-        $this->expectException(ClientExceptionInterface::class);
+        $this->expectException(ProviderConnectivityException::class);
 
         /** @var MockObject|BinlistClientInterface $clientMock */
         $clientMock = $this->getMockBuilder(BinlistClientInterface::class)

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace CommissionCalc\Command;
 
+use CommissionCalc\Exception\BadPaymentDataException;
+use CommissionCalc\Exception\ExceptionInterface;
+use CommissionCalc\Exception\ProviderConnectivityException;
 use CommissionCalc\RawCommissionCalcInterface;
-use Exception;
-use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -45,9 +46,15 @@ class PrintCommissionCommand extends Command
             try {
                 $commission = $this->commissionCalc->calcCommission($paymentData);
                 $output->writeln($commission);
-            } catch (ClientExceptionInterface $e) {
+            } catch (BadPaymentDataException $e) {
+                $output->writeln(sprintf(
+                    'Cannot parse payment data: "%s", error: "%s"',
+                    $paymentData,
+                    $e->getMessage()
+                ));
+            } catch (ProviderConnectivityException $e) {
                 $output->writeln('External service is broken: ' . $e->getMessage());
-            } catch (Exception $e) {
+            } catch (ExceptionInterface $e) {
                 $output->writeln($e->getMessage());
             }
         }

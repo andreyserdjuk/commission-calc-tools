@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace CommissionCalc;
 
+use CommissionCalc\Exception\ProviderConnectivityException;
+use CommissionCalc\Exception\ProviderDataException;
+use CommissionCalc\Exception\ProviderIntegrationException;
 use CommissionCalc\Models\BinData;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
@@ -21,13 +24,35 @@ class BinlistBinProvider implements BinProviderInterface
     }
 
     /**
-     * @throws ExceptionInterface|ClientExceptionInterface
+     * @throws ProviderIntegrationException
      */
     public function getBinData(string $bin): BinData
     {
-        $data = $this->client->getBinData($bin)->getContents();
-        /** @var BinData $binData */
-        $binData = $this->serializer->deserialize($data, BinData::class, 'json');
+        try {
+            $data = $this->client->getBinData($bin)->getContents();
+            /** @var BinData $binData */
+            $binData = $this->serializer->deserialize($data, BinData::class, 'json');
+        } catch (ClientExceptionInterface $e) {
+            throw new ProviderConnectivityException(
+                sprintf(
+                    'Cannot connect to bin provider "%s", error message: "%s"',
+                    __CLASS__,
+                    $e->getMessage()
+                ),
+                $e->getCode(),
+                $e
+            );
+        } catch (ExceptionInterface $e) {
+            throw new ProviderDataException(
+                sprintf(
+                    'Cannot parse data from bin provider "%s", error message: "%s"',
+                    __CLASS__,
+                    $e->getMessage()
+                ),
+                $e->getCode(),
+                $e
+            );
+        }
 
         return $binData;
     }

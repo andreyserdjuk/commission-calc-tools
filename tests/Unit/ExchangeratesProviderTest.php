@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace CommissionCalc\Tests\Unit;
 
+use CommissionCalc\Exception\ProviderConnectivityException;
+use CommissionCalc\Exception\ProviderDataException;
 use CommissionCalc\ExchangeRatesClientInterface;
 use CommissionCalc\ExchangeratesProvider;
 use CommissionCalc\Models\CurrencyRates;
 use GuzzleHttp\Exception\InvalidArgumentException;
 use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Http\Client\ClientExceptionInterface;
-use UnexpectedValueException;
 
 class ExchangeratesProviderTest extends BaseTestCase
 {
@@ -27,7 +27,7 @@ class ExchangeratesProviderTest extends BaseTestCase
         bool $isValidServerResponse
     ) {
         if (!$isValidServerResponse) {
-            $this->expectException(UnexpectedValueException::class);
+            $this->expectException(ProviderDataException::class);
         }
 
         $ratesClientMock = $this->createConfiguredMock(
@@ -50,7 +50,7 @@ class ExchangeratesProviderTest extends BaseTestCase
      */
     public function testApiServerError()
     {
-        $this->expectException(ClientExceptionInterface::class);
+        $this->expectException(ProviderConnectivityException::class);
 
         /** @var MockObject|ExchangeRatesClientInterface $clientMock */
         $clientMock = $this->getMockBuilder(ExchangeRatesClientInterface::class)
